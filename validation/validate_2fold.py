@@ -15,7 +15,7 @@ from utils import alt_tqa_evaluate, flattened_idx_to_layer_head, layer_head_to_f
 import llama
 
 HF_NAMES = {
-    'llama_7B': 'decapoda-research/llama-7b-hf', 
+    'llama_7B': 'huggyllama/llama-7b', 
     'honest_llama_7B': 'results_dump/llama_7B_seed_42_top_48_heads_alpha_15', 
     'alpaca_7B': 'circulus/alpaca-7b', 
     'honest_alpaca_7B': 'results_dump/alpaca_7B_seed_42_top_48_heads_alpha_15', 
@@ -41,6 +41,7 @@ def main():
     parser.add_argument('--seed', type=int, default=42, help='seed')
     parser.add_argument('--judge_name', type=str, required=False)
     parser.add_argument('--info_name', type=str, required=False)
+    parser.add_argument('--num_fewshot', type=int, default=0)
     args = parser.parse_args()
 
     # set seeds
@@ -70,15 +71,34 @@ def main():
     num_heads = model.config.num_attention_heads
 
     # load activations 
-    head_wise_activations = np.load(f"../features/{args.model_name}_{args.dataset_name}_head_wise.npy")
-    labels = np.load(f"../features/{args.model_name}_{args.dataset_name}_labels.npy")
+    ### HS: low memory cpu code
+    head_wise_activations_sep,labels_sep=[],[]
+    for i in range(4):
+        head_wise_activations_sep.append(np.load(f"../features/{args.model_name}_{args.dataset_name}_head_wise_{i}.npy"))
+        #head_wise_activations = np.load(f"../features/{args.model_name}_{args.dataset_name}_head_wise.npy")
+        #labels = np.load(f"../features/{args.model_name}_{args.dataset_name}_labels.npy")
+    head_wise_activations = np.concatenate(head_wise_activations_sep,axis=0)
+    print(f"head_wise_activation_length:{head_wise_activations.shape()}")
+    labels= np.load(f"../features/{args.model_name}_{args.dataset_name}_labels_0.npy")
+    head_wise_activations_sep,labels_sep=[],[]
+
+    
     head_wise_activations = rearrange(head_wise_activations, 'b l (h d) -> b l h d', h = num_heads)
 
     # tuning dataset: no labels used, just to get std of activations along the direction
-    activations_dataset = args.dataset_name if args.activations_dataset is None else args.activations_dataset
-    tuning_activations = np.load(f"../features/{args.model_name}_{activations_dataset}_head_wise.npy")
+    # activations_dataset = args.dataset_name if args.activations_dataset is None else args.activations_dataset
+    # tuning_activations = np.load(f"../features/{args.model_name}_{activations_dataset}_head_wise.npy")
+    # tuning_activations = rearrange(tuning_activations, 'b l (h d) -> b l h d', h = num_heads)
+    # tuning_labels = np.load(f"../features/{args.model_name}_{activations_dataset}_labels.npy")
+
+    for i in range(4):
+        head_wise_activations_sep.append(np.load(f"../features/{args.model_name}_{args.dataset_name}_head_wise_{i}.npy"))
+        #head_wise_activations = np.load(f"../features/{args.model_name}_{args.dataset_name}_head_wise.npy")
+
+    tuning_activations = np.concatenate(head_wise_activations_sep,axis=0)
     tuning_activations = rearrange(tuning_activations, 'b l (h d) -> b l h d', h = num_heads)
-    tuning_labels = np.load(f"../features/{args.model_name}_{activations_dataset}_labels.npy")
+    tuning_labels= np.load(f"../features/{args.model_name}_{args.dataset_name}_labels_0.npy")
+    head_wise_activations_sep,labels_sep=[],[]
 
     separated_head_wise_activations, separated_labels, idxs_to_split_at = get_separated_activations(labels, head_wise_activations)
 
@@ -105,8 +125,12 @@ def main():
             com_directions = get_com_directions(num_layers, num_heads, train_set_idxs, val_set_idxs, separated_head_wise_activations, separated_labels)
         else:
             com_directions = None
-        top_heads, probes = get_top_heads(train_set_idxs, val_set_idxs, separated_head_wise_activations, separated_labels, num_layers, num_heads, args.seed, args.num_heads, args.use_random_dir)
-
+        top_heads, probes,all_head_accs_np = get_top_heads(train_set_idxs, val_set_idxs, separated_head_wise_activations, separated_labels, num_layers, num_heads, args.seed, args.num_heads, args.use_random_dir)
+        #import pandas as pd 
+        all_head_accs_df = pd.DataFrame(all_head_accs_np)
+        all_head_accs_df.to_csv(f'/home/elicer/honest_llama/head_accs/{args.model_name}_seed_{args.seed}_{i}.csv')
+        
+        #all_head_accs_np.to_csv()
         print("Heads intervened: ", sorted(top_heads))
     
         interventions = get_interventions_dict(top_heads, probes, tuning_activations, num_heads, args.use_center_of_mass, args.use_random_dir, com_directions)
@@ -121,8 +145,8 @@ def main():
                     head_output[:, start_edit_location:, head, :] += args.alpha * proj_val_std * direction_to_add
             head_output = rearrange(head_output, 'b s h d -> b s (h d)')
             return head_output
-
-        filename = f'{args.model_name}_seed_{args.seed}_top_{args.num_heads}_heads_alpha_{int(args.alpha)}_fold_{i}'
+        #num_fewshot = 10
+        filename = f'{args.model_name}_seed_{args.seed}_top_{args.num_heads}_heads_alpha_{int(args.alpha)}_fold_{i}_fewshot_{args.num_fewshot}'
 
         if args.use_center_of_mass:
             filename += '_com'
@@ -133,7 +157,7 @@ def main():
                     
         curr_fold_results = alt_tqa_evaluate(
             {args.model_name: model}, 
-            ['judge', 'info', 'mc'], 
+            ['judge', 'info', 'mc','bleurt','bleu', 'rouge'], 
             f'splits/fold_{i}_test_seed_{args.seed}.csv', 
             f'results_dump/answer_dump/{filename}.csv', 
             f'results_dump/summary_dump/{filename}.csv', 
@@ -141,7 +165,9 @@ def main():
             interventions=interventions, 
             intervention_fn=lt_modulated_vector_add, 
             judge_name=args.judge_name, 
-            info_name=args.info_name
+            info_name=args.info_name,
+            num_fewshot = args.num_fewshot,
+            fewshot_path=f'splits/fold_{i}_train_seed_{args.seed}.csv'
         )
 
         print(f"FOLD {i}")
@@ -152,6 +178,9 @@ def main():
     
     results = np.array(results)
     final = results.mean(axis=0)
+
+    print(final)
+    #print(f'MC1 Score: {final[0]}, MC2 Score: {final[1]}, CE Loss: {final[2]}, KL wrt Original: {final[3]}')
 
     print(f'True*Info Score: {final[1]*final[0]}, True Score: {final[1]}, Info Score: {final[0]}, MC1 Score: {final[2]}, MC2 Score: {final[3]}, CE Loss: {final[4]}, KL wrt Original: {final[5]}')
 

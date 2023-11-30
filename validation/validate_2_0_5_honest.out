@@ -1,0 +1,30 @@
+nohup: ignoring input
+2023-11-07 04:31:31.824625: I tensorflow/core/util/port.cc:110] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2023-11-07 04:31:31.897098: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-11-07 04:31:32.834662: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Found cached dataset truthful_qa (/home/elicer/.cache/huggingface/datasets/truthful_qa/multiple_choice/1.1.0/63502f6bc6ee493830ce0843991b028d0ab568d221896b2ee3b8a5dfdaa9d7f4)
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 491.19it/s]normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:26<00:26, 26.58s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:41<00:00, 19.52s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:41<00:00, 20.58s/it]
+Traceback (most recent call last):
+  File "validate_2fold_base.py", line 121, in <module>
+    main()
+  File "validate_2fold_base.py", line 66, in main
+    r = model.to(args.device)
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/transformers/modeling_utils.py", line 1900, in to
+    return super().to(*args, **kwargs)
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/torch/nn/modules/module.py", line 987, in to
+    return self._apply(convert)
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/torch/nn/modules/module.py", line 639, in _apply
+    module._apply(fn)
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/torch/nn/modules/module.py", line 639, in _apply
+    module._apply(fn)
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/torch/nn/modules/module.py", line 639, in _apply
+    module._apply(fn)
+  [Previous line repeated 2 more times]
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/torch/nn/modules/module.py", line 662, in _apply
+    param_applied = fn(param)
+  File "/home/elicer/anaconda3/envs/iti/lib/python3.8/site-packages/torch/nn/modules/module.py", line 985, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 86.00 MiB (GPU 0; 39.25 GiB total capacity; 10.17 GiB already allocated; 50.75 MiB free; 10.17 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF

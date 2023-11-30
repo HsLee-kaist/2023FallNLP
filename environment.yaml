@@ -284,7 +284,7 @@ dependencies:
     - scikit-learn==1.2.2
     - scipy==1.10.1
     - seaborn==0.12.2
-    - sklearn==0.0.post5
+  #  - sklearn==0.0.post5
     - t5==0.7.1
     - tabulate==0.9.0
     - tenacity==8.2.2

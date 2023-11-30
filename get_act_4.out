@@ -1,0 +1,13 @@
+nohup: ignoring input
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+get_activations.py: line 3: from: command not found
+get_activations.py: line 4: from: command not found
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+get_activations.py: line 7: from: command not found
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+import-im6.q16: unable to open X server `' @ error/import.c/ImportImageCommand/346.
+get_activations.py: line 13: syntax error near unexpected token `('
+get_activations.py: line 13: `def main(): '
