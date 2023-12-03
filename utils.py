@@ -274,7 +274,7 @@ def tqa_run_answers(frame, engine, tag, preset, model=None, tokenizer=None, verb
     with torch.no_grad():
         print('verbose')
         for idx, input_ids in enumerate(tqdm(tokens)):
-            max_len = input_ids.shape[-1] + 50
+            max_len = input_ids.shape[-1] + 1
 
             # --- intervention code --- #
 

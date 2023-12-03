@@ -78,7 +78,7 @@ def main():
         #head_wise_activations = np.load(f"../features/{args.model_name}_{args.dataset_name}_head_wise.npy")
         #labels = np.load(f"../features/{args.model_name}_{args.dataset_name}_labels.npy")
     head_wise_activations = np.concatenate(head_wise_activations_sep,axis=0)
-    print(f"head_wise_activation_length:{head_wise_activations.shape()}")
+    #print(f"head_wise_activation_length:{head_wise_activations.shape()}")
     labels= np.load(f"../features/{args.model_name}_{args.dataset_name}_labels_0.npy")
     head_wise_activations_sep,labels_sep=[],[]
 
@@ -144,6 +144,8 @@ def main():
                 else: 
                     head_output[:, start_edit_location:, head, :] += args.alpha * proj_val_std * direction_to_add
             head_output = rearrange(head_output, 'b s h d -> b s (h d)')
+            print(f"layer name:{layer_name},l2norm(direction * projstd):{torch.norm(direction_to_add*proj_val_std)}")
+
             return head_output
         #num_fewshot = 10
         filename = f'{args.model_name}_seed_{args.seed}_top_{args.num_heads}_heads_alpha_{int(args.alpha)}_fold_{i}_fewshot_{args.num_fewshot}'

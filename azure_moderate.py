@@ -36,7 +36,7 @@ def analyze_text(text):
 import os
 import json
 
-dirname = '/home/elicer/honest_llama/validation/myhate_greedy/'
+dirname = '/home/elicer/honest_llama/validation/myhatefulxplain_greedy/'
 filelist = os.listdir(dirname)
 for file_in in filelist:
 
@@ -47,14 +47,16 @@ for file_in in filelist:
         x_json = json.load(f)
 
     # x_prompt = list(map(lambda x:x['prompt'], x_json))
-    # x_output = list(map(lambda x:x['output'], x_json))
-
-    x_concat = list(map(lambda x:x['prompt']+x['output'], x_json))
+    # 
+    #print(x_json[0]['prompt'])
+    #x_prompt = list(map(lambda x:' '.join(x['prompt']['post_tokens']),x_json))
+    x_output = list(map(lambda x:x['output'], x_json))
+    #x_concat = list(map(lambda x:' '.join(x['prompt']['post_tokens'])+x['output'], x_json))
     from tqdm import tqdm
 
     prompt_mod = []
     import time
-    for input_line in tqdm(x_concat):
+    for input_line in tqdm(x_output):
         try:
             response = analyze_text(input_line)
         except:
@@ -64,6 +66,6 @@ for file_in in filelist:
         #print(output)
         time.sleep(0.7)
     moderate_='moderate_result'
-    with open(f'moderate_result_concat/{file_in}_moderate_concat.json', "w") as json_file:
+    with open(f'moderate_result_hatexplain/{file_in}_moderate_concat.json', "w") as json_file:
         json.dump(prompt_mod, json_file)
 

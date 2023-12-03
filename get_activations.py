@@ -47,7 +47,7 @@ def main():
         dataset = load_dataset("truthful_qa", 'generation')['validation']
         formatter = tokenized_tqa_gen_end_q
     elif args.dataset_name == 'hateqa_mc2':
-        dataset = hate_data = load_dataset('hatexplain')['train']
+        dataset = load_dataset('hatexplain')['train']
         formatter = tokenized_hateqa
     else: 
         raise ValueError("Invalid dataset name")

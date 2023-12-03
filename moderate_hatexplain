@@ -1,0 +1,8 @@
+nohup: ignoring input
+open file: mydata_hate_alpha_-5.0_numheads_12_0.json
+Traceback (most recent call last):
+  File "azure_moderate.py", line 51, in <module>
+    x_prompt = list(map(lambda x:' '.join(x['prompt']['post_tokens']),x_json))
+  File "azure_moderate.py", line 51, in <lambda>
+    x_prompt = list(map(lambda x:' '.join(x['prompt']['post_tokens']),x_json))
+TypeError: string indices must be integers
