@@ -64,6 +64,7 @@ def main():
 
     cache_sep = 5
     prompt_len= len(prompts)//5
+    print('prompt_len',prompt_len)
     prompt_split = [range(prompt_len),range(prompt_len,2*prompt_len),range(2*prompt_len,3*prompt_len),range(3*prompt_len,4*prompt_len),range(4*prompt_len,len(prompts))]
     
     for i in range(cache_sep):

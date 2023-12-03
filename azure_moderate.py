@@ -36,10 +36,12 @@ def analyze_text(text):
 import os
 import json
 
-dirname = '/home/elicer/honest_llama/validation/myhatefulxplain_greedy/'
+#dirname = '/home/elicer/honest_llama/validation/myhatefulxplain_greedy/'
+dirname = '/home/elicer/honest_llama/validation/'
 filelist = os.listdir(dirname)
 for file_in in filelist:
-
+    if 'hatexplain_' not in file_in or '.json' not in file_in:
+        continue
     file = dirname + file_in
 
     print(f"open file: {file_in}")
@@ -66,6 +68,6 @@ for file_in in filelist:
         #print(output)
         time.sleep(0.7)
     moderate_='moderate_result'
-    with open(f'moderate_result_hatexplain/{file_in}_moderate_concat.json', "w") as json_file:
+    with open(f'moderate_result_hatexpliain_new/{file_in}_moderate_concat.json', "w") as json_file:
         json.dump(prompt_mod, json_file)
 
