@@ -276,14 +276,13 @@ def tqa_run_answers(frame, engine, tag, preset, model=None, tokenizer=None, verb
             max_len = input_ids.shape[-1] + 1
 
             # --- intervention code --- #
-            print(input_ids)
+            
             with TraceDict(model, layers_to_intervene, edit_output=intervene) as ret: 
                 input_ids = input_ids.to(device)
                 model_gen_tokens = model.generate(input_ids, top_k=1, max_length=max_len, num_return_sequences=1,)[:, input_ids.shape[-1]:]
             
             model_gen_str = tokenizer.decode(model_gen_tokens[0], skip_special_tokens=True)
             model_gen_str = model_gen_str.strip()
-            print(model_gen_str)
             try: 
                 # remove everything after 'Q:'
                 model_gen_str = model_gen_str.split("Q:")[0].strip()

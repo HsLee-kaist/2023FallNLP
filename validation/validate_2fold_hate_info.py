@@ -60,7 +60,8 @@ def main():
     df = df.sort_values(by='Question', key=lambda x: x.map({k: i for i, k in enumerate(golden_q_order)}))
     
     # get two folds using numpy
-    fold_idxs = np.array_split(np.arange(315), args.num_fold)
+    fold_idxs = np.array_split(np.arange(len(df)), args.num_fold)
+    hate_idxs = np.array_split(np.arange(10000), args.num_fold)
 
     # create model
     model_name = HF_NAMES["honest_" + args.model_name if args.use_honest else args.model_name]
@@ -113,11 +114,19 @@ def main():
         train_idxs = np.concatenate([fold_idxs[j] for j in range(args.num_fold) if j != i])
         test_idxs = fold_idxs[i]
 
+        train_idxs_hate = np.concatenate([hate_idxs[j] for j in range(args.num_fold) if j != i])
+        test_idxs_hate = hate_idxs[i]
+
+
         print(f"Running fold {i}")
 
         # pick a val set using numpy
         train_set_idxs = np.random.choice(train_idxs, size=int(len(train_idxs)*(1-args.val_ratio)), replace=False)
         val_set_idxs = np.array([x for x in train_idxs if x not in train_set_idxs])
+        
+        train_set_idxs_hate = np.random.choice(train_idxs_hate, size=int(len(train_idxs_hate)*(1-args.val_ratio)), replace=False)
+        val_set_idxs_hate = np.array([x for x in train_idxs_hate if x not in train_set_idxs_hate])
+
 
         # save train and test splits
         df.iloc[train_set_idxs].to_csv(f"splits/fold_{i}_train_seed_{args.seed}_hate.csv", index=False)
@@ -129,7 +138,7 @@ def main():
             com_directions = get_com_directions(num_layers, num_heads, train_set_idxs, val_set_idxs, separated_head_wise_activations, separated_labels)
         else:
             com_directions = None
-        top_heads, probes,all_head_accs_np = get_top_heads(train_set_idxs, val_set_idxs, separated_head_wise_activations, separated_labels, num_layers, num_heads, args.seed, args.num_heads, args.use_random_dir)
+        top_heads, probes,all_head_accs_np = get_top_heads(train_set_idxs_hate, val_set_idxs_hate, separated_head_wise_activations, separated_labels, num_layers, num_heads, args.seed, args.num_heads, args.use_random_dir)
         #import pandas as pd 
         all_head_accs_df = pd.DataFrame(all_head_accs_np)
         all_head_accs_df.to_csv(f'/home/elicer/honest_llama/head_accs/{args.model_name}_seed_{args.seed}_{i}_hate.csv')
